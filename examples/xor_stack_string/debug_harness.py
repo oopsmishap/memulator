@@ -90,6 +90,7 @@ print(f"Strings recovered: {len(strings)}")
 
 print_unique_strings(strings)
 
+# Assembly of the example we are extracting the strings from
 # ======================================================================================================================
 # .text:00401050 55                                            push    ebp
 # .text:00401051 8B EC                                         mov     ebp, esp
