@@ -1,4 +1,5 @@
 # Memulator
+![memulator logo](img/logo.png)
 
 A simple novel approach to memory only emulation, the main benifit of this approach is that it is very fast and can be 
 used to emulate large programs with minimal overhead. However it is not a complete solution and will not work for all 
