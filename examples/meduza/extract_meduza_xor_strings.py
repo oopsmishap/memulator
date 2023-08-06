@@ -145,14 +145,13 @@ print()
 print(f"Setup time:      {round(setup_time*1000)}ms")
 print(f"Chunk time:      {round(chunk_time*1000)}ms")
 print(f"Memulation time: {round(emulation_time*1000)}ms")
-print("\ndone\n")
 
 # Extract C2 IPs from found strings
 
 ip_regex = re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
 ips = filter(lambda x: ip_regex.match(x[1]), strings)
 
-print("C2 IPs:")
+print("\nC2 IPs:")
 for ip in ips:
     print(f"0x{ip[0]:08x} : {ip[1]}")
 
