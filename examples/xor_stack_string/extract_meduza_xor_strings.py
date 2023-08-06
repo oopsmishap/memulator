@@ -1,4 +1,6 @@
-import logging
+# An example of extracting strings from a binary that uses xor to obfuscate strings
+# This example uses a meduza stealer x32 sample, the results are surprisingly good for such a simple approach
+# You can get the sample from: https://www.unpac.me/results/d3ad7744-0fec-45cf-adc3-00342e1ad4ce
 
 from memulator import Memulator
 
@@ -6,8 +8,6 @@ import re
 import time
 import pefile as pefile
 from capstone import *
-
-logging.basicConfig(level=logging.INFO)
 
 # This function is from @herrcore @ OALabs
 # Taken from: https://research.openanalysis.net/xorstr/decryption/python/2023/06/25/xorstr.html
@@ -46,7 +46,7 @@ def find_all_pxor(md: Cs, pe: pefile.PE, scan_length):
         chunk_instruction_address = image_base + section_rva + chunk_offset[0]
         instructions = []
         for inst in md.disasm(chunk_data, chunk_instruction_address):
-            if inst.mnemonic in ('pxor', 'vpxor', 'vxorps',
+            if inst.mnemonic in ('pxor', 'vpxor', 'vxorps', 'call',
                                  'mov', 'movaps', 'movdqa', 'movdqu', 'movups',
                                  'movups', 'movdqu', 'vmovdqu', 'vmovdqa',
                                  'ret', 'retn', 'sub', 'add', 'push', 'pop'):
@@ -73,7 +73,6 @@ def string_builder(strings):
     return out[::-1]
 
 
-# Removes duplicate strings and prints them
 def print_unique_strings(strings):
     string_dict = {}
     last_string = ''
@@ -92,10 +91,10 @@ def setup_capstone():
     md.syntax = CS_OPT_SYNTAX_INTEL
     return md
 
-# xor_stack_string stealer x32 - 29cf1ba279615a9f4c31d6441dd7c93f5b8a7d95f735c0daa3cc4dbb799f66d4
-#SAMPLE_PATH = "./29cf1ba279615a9f4c31d6441dd7c93f5b8a7d95f735c0daa3cc4dbb799f66d4"
-#SAMPLE_PATH = "E:/re/_malware/RisePro/bin/meduza.bin"
-SAMPLE_PATH = "E:/re/_malware/RisePro/bin/2cd2f077ca597ad0ef234a357ea71558d5e039da9df9958d0b8bd0efa92e74c9.bin32"
+# meduza stealer x32
+# 29cf1ba279615a9f4c31d6441dd7c93f5b8a7d95f735c0daa3cc4dbb799f66d4
+#SAMPLE_PATH = ./29cf1ba279615a9f4c31d6441dd7c93f5b8a7d95f735c0daa3cc4dbb799f66d4"
+SAMPLE_PATH = "E:/re/_malware/RisePro/bin/meduza.bin"
 
 t = time.time()
 
@@ -146,18 +145,14 @@ print()
 print(f"Setup time:      {round(setup_time*1000)}ms")
 print(f"Chunk time:      {round(chunk_time*1000)}ms")
 print(f"Memulation time: {round(emulation_time*1000)}ms")
-print("\ndone")
+print("\ndone\n")
 
-# found 21 chunks
-# Strings recovered: 614
-# Found strings: 540
-#
-# 0x4011c3 Coinomi\Coinomi\wallets
-# 0x4012dc Coinomi
-# 0x4013f6 DashCore
-# 0x401503 Dash
-# 0x40161d LitecoinCore
-# ...
-# Setup time:       159ms
-# Chunk time:       617ms
-# Memulation time: 1044ms
+# Extract C2 IPs from found strings
+
+ip_regex = re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
+ips = filter(lambda x: ip_regex.match(x[1]), strings)
+
+print("C2 IPs:")
+for ip in ips:
+    print(f"0x{ip[0]:08x} : {ip[1]}")
+
